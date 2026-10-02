@@ -52,6 +52,7 @@ Three layers, each replaceable:
 - **More concurrency without lost writes:** replace the single file with one file per entry (`.ledger/tasks/TASK-007.md`, front-matter for status). Entries no longer collide and git merges cleanly, at the price of a harder overview (use `grep -l "status:open"`). Switch when two or more agents regularly work at once.
 - **Parallel work:** give each agent its own git worktree and branch, and let the ledger live on the main branch. Not part of this kit.
 - **Unattended operation:** see [automation.md](automation.md).
+- **Seeing what is going on:** the optional [dashboard](../dashboard/README.md) renders the ledger in a browser through a read-only server on your own machine. It adds no new source of truth; the file stays the state.
 
 ## What this deliberately is not
 

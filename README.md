@@ -2,7 +2,7 @@
 
 **A small architecture for working with several AI coding agents on one repo, without being the copy-paste relay between them.**
 
-It works across tools (Claude Code, Codex, Antigravity, Gemini CLI, Cursor, …) and inside one tool (an `architect`, a `builder` and a `reviewer`, all running as separate sessions of the same agent). There is no runtime or background service: it is a protocol, a shared markdown file, a few pointer files, and a small optional installer/validator.
+It works across tools (Claude Code, Codex, Antigravity, Gemini CLI, Cursor, …) and inside one tool (an `architect`, a `builder` and a `reviewer`, all running as separate sessions of the same agent). There is no runtime or background service: it is a protocol, a shared markdown file, a few pointer files, and a small optional installer/validator. An optional read-only [dashboard](dashboard/) lets you watch it from a browser; it is a separate, opt-in piece, and the core stays free of any running service.
 
 ```
         Claude Code          Codex           Antigravity / Gemini / Cursor / …
@@ -62,6 +62,7 @@ A tool that has no instruction file should need only one line at the start of th
 | [`install.sh`](install.sh) | Copies the above into your repo, idempotently. |
 | [`template/.ledger/validate.sh`](template/.ledger/validate.sh) | Checks ledger structure, duplicate IDs, pointer markers and conflict markers. |
 | [`tests/test.sh`](tests/test.sh) | Regression tests for install, update, repair and validation behavior. |
+| [`dashboard/`](dashboard/README.md) | Optional read-only web dashboard: a static page plus a small local server on your machine. No backend, no accounts. |
 | [`docs/architecture.md`](docs/architecture.md) | Why it is designed this way, and where it breaks. |
 | [`docs/tools.md`](docs/tools.md) | Which file each tool reads, and what has and hasn't been verified. |
 | [`docs/one-tool-many-roles.md`](docs/one-tool-many-roles.md) | Running several agents inside a single tool. |
