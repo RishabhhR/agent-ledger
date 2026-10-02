@@ -23,7 +23,7 @@ Three layers, each replaceable:
 
 ## Design decisions, and why
 
-**State is a file in git, not a service.** Every tool can read and write a file, and none needs to know the others exist. Git gives history, blame, review and sync for free, and the coordination survives you changing tools. The cost: no locking (see failure modes).
+**State is a file in git, not a service.** Every tool can read and write a file, and none needs to know the others exist. Git gives history, blame, review and sync for free, and the coordination survives you changing tools. The cost: no locking (see failure modes). `.ledger/validate.sh` provides a small, local structural check without turning the architecture into a service.
 
 **One protocol, thin pointers.** Instruction files differ per tool and change over time. Keeping the rules in one place means adding a new tool is a single pointer, not a rewrite, and the rules can't contradict each other across tools.
 
@@ -39,12 +39,13 @@ Three layers, each replaceable:
 
 | Failure | What happens | Mitigation in this kit |
 |---|---|---|
-| **Lost write** | Two agents save the ledger at the same instant; one entry is silently dropped. | One writer at a time; re-read after writing and confirm your entry is there. Scale-up option below. |
+| **Lost write** | Two agents save the ledger at the same instant; one entry is silently dropped. | One writer at a time; re-read after writing and confirm your entry is there. The validator catches the resulting duplicate/malformed structure, but cannot recover a lost entry. Scale-up option below. |
 | **Protocol ignored** | Pointers are advice. An agent may skip the ledger or the evidence step. | You read the ledger; a reviewer re-runs checks; weak done notes are rejected as `DEFECT`s. |
 | **Sandboxed tool can't commit** | Seen in the reference run: Codex couldn't write `.git`. | Protocol says report "not committed: sandbox" and leave changes for someone else to commit. |
 | **Prompt injection through the ledger** | Ledger text is read as instructions by the next agent. | Protocol labels it trusted-input only; review ledger changes from anyone you don't trust. |
 | **Same-model review** | Author and reviewer share blind spots. | Use a different model or tool as reviewer for risky work. |
 | **Ledger bloat** | A long-lived ledger gets expensive to read. | Done entries can be archived to `.ledger/archive/` by a human or a housekeeping task; not automated here. |
+| **Malformed coordination state** | A merge or manual edit leaves duplicate IDs, wrong sections, conflict markers, or broken pointer markers. | Run `.ledger/validate.sh`; the kit's installer also repairs malformed pointer markers. |
 
 ## Scaling up
 
@@ -54,4 +55,4 @@ Three layers, each replaceable:
 
 ## What this deliberately is not
 
-It is not a sandbox, a permissions system, a scheduler, or a replacement for code review. It makes agent work *visible and checkable*; it does not make it correct.
+It is not a sandbox, a permissions system, a scheduler, or a replacement for code review. It makes agent work *visible and checkable*; it does not make it correct. The validator checks syntax and structure, not implementation quality or the truth of an agent's evidence.
