@@ -45,7 +45,7 @@ Before or after an agent run, validate the coordination files:
 ./.ledger/validate.sh /path/to/your/repo
 ```
 
-For an existing installation, `./agent-ledger/install.sh --check /path/to/your/repo` validates without changing anything. `--diff` shows template drift; `--update` adds newly introduced kit files and repairs pointers without overwriting existing project files.
+For an existing installation, `./agent-ledger/install.sh --check /path/to/your/repo` validates without changing anything. `--diff` shows template drift; `--update` is an explicitly named, safe re-run of the install/repair action for scripts and automation, without overwriting existing project files.
 
 A tool that has no instruction file should need only one line at the start of the session (untested): *"Read `.ledger/PROTOCOL.md` and follow it. Your agent name is X."*
 

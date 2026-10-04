@@ -10,6 +10,7 @@ set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
 mode="install"
+target=""
 
 usage() {
   cat <<'MSG'
@@ -18,25 +19,45 @@ Usage: ./install.sh [--check|--diff|--update] [REPO]
   install (default)  Add missing kit files and repair malformed pointers.
   --check            Validate an installed kit without changing files.
   --diff             Show differences from the kit templates.
-  --update           Add newly introduced kit files and repair pointers.
+  --update           Safe re-run alias for install; add missing files and repair pointers.
 
 Existing project files are not overwritten. Use --diff before deciding
 whether a customized existing file should be updated manually.
 MSG
 }
 
-case "${1:-}" in
-  --check|--diff|--update)
-    mode="${1#--}"
-    shift
-    ;;
-  --help|-h)
-    usage
-    exit 0
-    ;;
-esac
+for arg in "$@"; do
+  case "$arg" in
+    --check|--diff|--update)
+      requested_mode="${arg#--}"
+      if [ "$mode" != "install" ] && [ "$mode" != "$requested_mode" ]; then
+        echo "ERROR: choose only one of --check, --diff, or --update." >&2
+        usage >&2
+        exit 2
+      fi
+      mode="$requested_mode"
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      echo "ERROR: unknown option: $arg" >&2
+      usage >&2
+      exit 2
+      ;;
+    *)
+      if [ -n "$target" ]; then
+        echo "ERROR: expected one repository path, got an extra argument: $arg" >&2
+        usage >&2
+        exit 2
+      fi
+      target="$arg"
+      ;;
+  esac
+done
 
-target="${1:-.}"
+target="${target:-.}"
 [ -d "$target" ] || { echo "Not a directory: $target" >&2; exit 1; }
 target="$(cd "$target" && pwd)"
 version="$(tr -d '\r\n' < "$here/VERSION")"
@@ -122,6 +143,10 @@ for f in PROTOCOL.md LEDGER.md roles/architect.md roles/builder.md roles/reviewe
   fi
 done
 
+if [ "$mode" = "update" ]; then
+  echo "update: using the same non-destructive install/repair actions"
+fi
+
 if [ -e "$target/.ledger/.agent-ledger-version" ]; then
   echo "keep    .ledger/.agent-ledger-version (already exists)"
 else
@@ -138,9 +163,15 @@ for f in CLAUDE.md AGENTS.md GEMINI.md; do
 
   starts=$(grep -Fc "$marker" "$target/$f" || true)
   ends=$(grep -Fc "$end_marker" "$target/$f" || true)
+  start_line=0
+  end_line=0
+  if [ "$starts" -ge 1 ]; then
+    start_line=$(grep -nF "$marker" "$target/$f" | head -n1 | cut -d: -f1)
+  fi
+  if [ "$ends" -ge 1 ]; then
+    end_line=$(grep -nF "$end_marker" "$target/$f" | head -n1 | cut -d: -f1)
+  fi
   if [ "$starts" -eq 1 ] && [ "$ends" -eq 1 ]; then
-    start_line=$(grep -nF "$marker" "$target/$f" | cut -d: -f1)
-    end_line=$(grep -nF "$end_marker" "$target/$f" | cut -d: -f1)
     if [ "$start_line" -lt "$end_line" ]; then
       echo "keep    $f (pointer already there)"
       continue
@@ -156,19 +187,32 @@ for f in CLAUDE.md AGENTS.md GEMINI.md; do
     continue
   fi
 
-  # Remove marker lines from malformed/duplicate blocks, preserve all other
-  # project text, then append one canonical block.
-  tmp="$(mktemp "$target/.agent-ledger-pointer.XXXXXX")"
-  awk -v start="$marker" -v end="$end_marker" '$0 != start && $0 != end { print }' "$target/$f" > "$tmp"
+  # Remove complete managed blocks from malformed/duplicate pointers, preserve
+  # all project text outside those blocks, then append one canonical block.
+  # Keep an incomplete block's text: it may contain project-owned content.
+  pointer_tmp_dir="${pointer_tmp_dir:-$(mktemp -d "${TMPDIR:-/tmp}/agent-ledger-pointer.XXXXXX")}"
+  tmp="$pointer_tmp_dir/current"
+  if [ "$starts" -ge 1 ] && [ "$ends" -ge 1 ] && [ "$start_line" -lt "$end_line" ]; then
+    awk -v start="$marker" -v end="$end_marker" '
+      $0 == start { in_block=1; next }
+      in_block && $0 == end { in_block=0; next }
+      !in_block { print }
+    ' "$target/$f" > "$tmp"
+  else
+    awk -v start="$marker" -v end="$end_marker" '$0 != start && $0 != end { print }' "$target/$f" > "$tmp"
+  fi
   {
     cat "$tmp"
     printf '\n'
     cat "$here/template/pointers/$f"
   } > "$tmp.new"
   mv "$tmp.new" "$target/$f"
-  rm -f "$tmp"
   echo "repair  $f (canonical pointer block installed)"
 done
+
+if [ -n "${pointer_tmp_dir:-}" ]; then
+  rm -rf "$pointer_tmp_dir"
+fi
 
 cat <<MSG
 
