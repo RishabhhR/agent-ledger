@@ -1,0 +1,49 @@
+name: Verified with a tool
+description: Share a reproducible verification result from an agent or tool.
+title: "Verification: "
+labels:
+  - verification
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for evidence, not a compatibility claim. Remove secrets, private repository names, local paths, and personal data.
+  - type: input
+    id: tool
+    attributes:
+      label: Tool and version
+      placeholder: e.g. Gemini CLI 0.x
+    validations:
+      required: true
+  - type: input
+    id: pair
+    attributes:
+      label: Tool and instruction-file pair
+      description: Which tool read which file?
+      placeholder: e.g. Cursor + AGENTS.md
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup and steps
+      description: Include safe, reproducible commands and the repository state.
+      placeholder: Describe the clean setup and exact steps.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Result and evidence
+      description: State what passed, what failed, and what remains unverified.
+      placeholder: Include the exact check and its result.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, shell, and relevant runtime versions.
+      placeholder: macOS, Bash, Node 20
+    validations:
+      required: true

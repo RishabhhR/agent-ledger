@@ -1,0 +1,8 @@
+# Local deployment metadata and dependencies
+.vercel/
+node_modules/
+
+# macOS and editor noise
+.DS_Store
+*.swp
+*.swo

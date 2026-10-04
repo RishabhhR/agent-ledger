@@ -83,6 +83,35 @@ bash "$installer" "$partial" > "$tmp/partial.log"
 grep -q 'partial content' "$partial/CLAUDE.md"
 bash "$installer" --check "$partial"
 
+# Repair writes through a symlink instead of replacing it.
+symlink_project="$tmp/symlink-project"
+mkdir -p "$symlink_project"
+printf '%s\n%s\n' '# shared instructions' '<!-- agent-ledger:start -->' > "$symlink_project/AGENTS.md"
+ln -s AGENTS.md "$symlink_project/CLAUDE.md"
+bash "$installer" "$symlink_project" > "$tmp/symlink.log"
+[ -L "$symlink_project/CLAUDE.md" ]
+[ "$(readlink "$symlink_project/CLAUDE.md")" = 'AGENTS.md' ]
+[ "$(grep -Fc '<!-- agent-ledger:start -->' "$symlink_project/AGENTS.md")" -eq 1 ]
+[ "$(grep -Fc '<!-- agent-ledger:end -->' "$symlink_project/AGENTS.md")" -eq 1 ]
+bash "$installer" --check "$symlink_project"
+
+# Pointer repair allocates temporary files under TMPDIR, not in the project.
+mktemp_bin="$tmp/mktemp-bin"
+mkdir -p "$mktemp_bin"
+printf '%s\n' '#!/usr/bin/env bash' 'printf "%s\\n" "$*" >> "$AGENT_LEDGER_MKTEMP_LOG"' 'exec /usr/bin/mktemp "$@"' > "$mktemp_bin/mktemp"
+chmod +x "$mktemp_bin/mktemp"
+repair_tmp="$tmp/repair-tmp"
+mkdir -p "$repair_tmp"
+repair_project="$tmp/tempdir-project"
+mkdir -p "$repair_project"
+printf '%s\n%s\n' '# project text' '<!-- agent-ledger:start -->' > "$repair_project/CLAUDE.md"
+mktemp_log="$tmp/mktemp.log"
+TMPDIR="$repair_tmp" AGENT_LEDGER_MKTEMP_LOG="$mktemp_log" PATH="$mktemp_bin:$PATH" \
+  bash "$installer" "$repair_project" > "$tmp/tempdir.log"
+grep -q "$repair_tmp/agent-ledger-pointer\." "$mktemp_log"
+! grep -q "$repair_project/\.agent-ledger-pointer\." "$mktemp_log"
+[ -z "$(find "$repair_project" -maxdepth 1 -name '.agent-ledger-pointer.*' -print -prune)" ]
+
 # Duplicate complete blocks are removed rather than leaving stale orphan text.
 duplicate="$tmp/duplicate"
 mkdir -p "$duplicate"

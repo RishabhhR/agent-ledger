@@ -1,0 +1,50 @@
+name: Bug report
+description: Report a reproducible problem in agent-ledger.
+title: "Bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove secrets, private repository names, local paths, and personal data before submitting.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and the behavior you expected.
+      placeholder: Tell us what happened and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Include the smallest safe reproduction and exact commands.
+      placeholder: |
+        1. Run ...
+        2. Edit ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: e.g. v0.1.0 or a short commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, shell, Node version if relevant, and the agent/tool involved.
+      placeholder: macOS, Bash, Node 20, Claude Code
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Safe logs or output
+      description: Paste redacted output only. Never include secrets or private paths.
+      render: shell

@@ -12,7 +12,7 @@ There is **no backend and no account**. The page only ever talks to a server run
 
 ## Run it
 
-You need Node.js and a repo that has the ledger (`install.sh`). It uses only Node's built-in modules and was tested on Node 20; CI is set up for 18, 20 and 22 but has not run yet.
+You need Node.js and a repo that has the ledger (`install.sh`). It uses only Node's built-in modules and was tested on Node 20; CI runs on Ubuntu with Node 18, 20 and 22.
 
 ```bash
 node dashboard/server/ledger-server.mjs --repo /path/to/your/repo
@@ -35,6 +35,8 @@ Deploy the folder `dashboard/web` as a static site (on Vercel, set the project's
 ```bash
 node dashboard/server/ledger-server.mjs --repo . --allow-origin https://your-site.example
 ```
+
+A production static copy of the page is available at [agent-ledger-dashboard-ecru.vercel.app](https://agent-ledger-dashboard-ecru.vercel.app/). The page itself has no ledger access; it only works when your local server is started with that exact origin in `--allow-origin`.
 
 The hosted page shows this exact command with its own address filled in. Everything else works the same: the page fetches from `http://127.0.0.1:<port>` in your browser.
 

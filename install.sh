@@ -206,7 +206,10 @@ for f in CLAUDE.md AGENTS.md GEMINI.md; do
     printf '\n'
     cat "$here/template/pointers/$f"
   } > "$tmp.new"
-  mv "$tmp.new" "$target/$f"
+  # Redirect through the existing path so a project-owned symlink keeps
+  # pointing at its target instead of being replaced by a regular file.
+  cat "$tmp.new" > "$target/$f"
+  rm -f "$tmp.new"
   echo "repair  $f (canonical pointer block installed)"
 done
 

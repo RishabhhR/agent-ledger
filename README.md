@@ -1,6 +1,18 @@
 # agent-ledger
 
-**A small architecture for working with several AI coding agents on one repo, without being the copy-paste relay between them.**
+## Stop being the copy-paste relay between coding agents
+
+When Claude Code, Codex, or another coding agent works on the same repository, you should not have to carry task status, evidence, and handoffs between windows yourself.
+
+**agent-ledger gives those sessions one inspectable place to claim work, record evidence, and be independently verified.** It is a small file-based protocol, not an orchestration service.
+
+### Start in three commands
+
+```bash
+git clone https://github.com/RishabhhR/agent-ledger
+cd agent-ledger
+./install.sh /path/to/your/repo
+```
 
 It works across tools (Claude Code, Codex, Antigravity, Gemini CLI, Cursor, …) and inside one tool (an `architect`, a `builder` and a `reviewer`, all running as separate sessions of the same agent). There is no runtime or background service: it is a protocol, a shared markdown file, a few pointer files, and a small optional installer/validator. An optional read-only [dashboard](dashboard/) lets you watch it from a browser; it is a separate, opt-in piece, and the core stays free of any running service.
 
@@ -26,12 +38,7 @@ When you use more than one AI tool, each one is blind to the others. You paste o
 2. **Close with evidence.** "Done" requires the exact check that was run and what it printed, plus what was *not* verified.
 3. **The author is not the verifier.** Another agent (or role) re-runs the check and records `PASS:` or files a `DEFECT` task. Nobody quietly rewrites someone else's code.
 
-## Start in five minutes
-
-```bash
-git clone https://github.com/RishabhhR/agent-ledger   # or download the ZIP from GitHub
-./agent-ledger/install.sh /path/to/your/repo
-```
+## Finish the setup in five minutes
 
 The script copies `.ledger/` into your repo and adds a short pointer to `CLAUDE.md`, `AGENTS.md` and `GEMINI.md` (creating them, or appending without touching what is there). It never overwrites existing project files and repairs malformed pointer markers if an earlier install was interrupted. Then:
 
@@ -69,9 +76,24 @@ A tool that has no instruction file should need only one line at the start of th
 | [`docs/automation.md`](docs/automation.md) | Going from manual relay to an unattended loop. |
 | [`examples/real-run-ledger.md`](examples/real-run-ledger.md) | A real ledger from a Codex → Claude run, unedited. |
 
+The hosted static dashboard is available at [agent-ledger-dashboard-ecru.vercel.app](https://agent-ledger-dashboard-ecru.vercel.app/). It is only the page; your ledger still stays on your machine and is read by the local server you start.
+
+## Verified tool matrix
+
+This table is intentionally conservative and matches [docs/tools.md](docs/tools.md):
+
+| Tool | File it reads | Verified in this kit |
+|---|---|---|
+| Claude Code | `CLAUDE.md` | **Yes.** A session given only a role card followed the protocol and recorded its review. |
+| Codex CLI | `AGENTS.md` | **Yes.** A headless `codex exec` run, told only to "pick up any work waiting for you", read `AGENTS.md`, then `.ledger/PROTOCOL.md`, and closed the task with evidence. |
+| Antigravity | `AGENTS.md` | Reported working in the author's own setup; **not re-verified in this kit's run.** |
+| Gemini CLI | `GEMINI.md` | **No.** The kit ships a `GEMINI.md` pointer based on the commonly documented convention. |
+| Cursor, GitHub Copilot, Windsurf, Aider, others | Their own rules files, many also read `AGENTS.md` | **No.** Add the pointer wherever the tool loads project instructions. |
+| Anything else | n/a | Paste one line at session start: *"Read `.ledger/PROTOCOL.md` and follow it. Your agent name is X."* Should work anywhere an agent can read files; not tested. |
+
 ## What has actually been run
 
-One real cross-tool run, on a toy task, in a scratch repo: a human seeded a task for **Codex**, which read `AGENTS.md` and `.ledger/PROTOCOL.md` on its own, did the work and closed it with evidence; then **Claude**, given only a reviewer role card, re-ran the tests and recorded `PASS:` without touching the code. The resulting ledger is in [`examples/`](examples/real-run-ledger.md). The installer and validator are covered by shell regression tests on every GitHub push and pull request. The installer was tested on a fresh repo, on a repo with an existing `CLAUDE.md`, on a second run, with a project-owned ledger, and with an interrupted pointer block.
+One real cross-tool run, on a toy task, in a scratch repo: a human seeded a task for **Codex**, which read `AGENTS.md` and `.ledger/PROTOCOL.md` on its own, did the work and closed it with evidence; then **Claude**, given only a reviewer role card, re-ran the tests and recorded `PASS:` without touching the code. The resulting ledger is in [`examples/`](examples/real-run-ledger.md). The [short terminal demo](demo/agent-ledger-demo.cast) shows the same kind of claim → work → review handoff from a fresh run. The installer and validator are covered by shell regression tests on every GitHub push and pull request. The installer was tested on a fresh repo, on a repo with an existing `CLAUDE.md`, on a second run, with a project-owned ledger, and with an interrupted pointer block.
 
 Not verified here: Antigravity, Gemini CLI, Cursor, Copilot or any other tool beyond Claude Code and Codex, large projects, or more than two agents at once. See [docs/tools.md](docs/tools.md).
 
