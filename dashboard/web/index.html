@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Ledger Dashboard</title>
+  <meta name="description" content="A read-only view of your repo's agent ledger. It talks only to a server on your own machine.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>Agent Ledger</h1>
+      <span class="repo" id="repo-name" hidden></span>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite">
+      <span class="dot" id="status-dot" aria-hidden="true"></span>
+      <span id="status-text">Not connected</span>
+      <button type="button" class="ghost" id="disconnect" hidden>Disconnect</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="connect" aria-labelledby="connect-title">
+      <h2 id="connect-title">Connect to your repo</h2>
+      <p class="lede">See what your AI agents are doing, what they finished, and what needs you. <strong>Your ledger never leaves your computer.</strong> This page has no backend; it only talks to a small server running on your own machine, and it can only read.</p>
+
+      <ol class="steps">
+        <li>
+          <strong>Set up the ledger in your repo</strong> (once), with the kit's <code>install.sh</code>.
+        </li>
+        <li>
+          <strong>Start the local server</strong> in a terminal:
+          <div class="cmd"><code id="cmd-text">node dashboard/server/ledger-server.mjs --repo .</code><button type="button" class="ghost" id="copy-cmd">Copy</button></div>
+          <p class="hint" id="cmd-hint"></p>
+        </li>
+        <li>
+          <strong>Paste the pairing code</strong> it prints. The code changes every time the server starts, and only works on your machine.
+        </li>
+      </ol>
+
+      <form id="connect-form" autocomplete="off" novalidate>
+        <div class="fields">
+          <label id="port-field">Port
+            <input id="port" name="port" inputmode="numeric" value="4780" size="6" aria-describedby="connect-error">
+          </label>
+          <label class="grow">Pairing code
+            <input id="code" name="code" placeholder="ABCD-EFGH-JKMN-PQRS" spellcheck="false" autocapitalize="characters" aria-describedby="connect-error">
+          </label>
+          <button type="submit" id="connect-btn">Connect</button>
+        </div>
+        <div id="connect-error" class="error" role="alert" hidden></div>
+      </form>
+    </section>
+
+    <section id="dash" hidden>
+      <div id="stale" class="banner" role="status" hidden></div>
+
+      <section aria-labelledby="next-title">
+        <h2 id="next-title">What to do next</h2>
+        <ul id="next" class="next"></ul>
+      </section>
+
+      <section aria-labelledby="decisions-title">
+        <h2 id="decisions-title">Decisions waiting <span class="count" id="decisions-count"></span></h2>
+        <div id="decisions" class="cards"></div>
+      </section>
+
+      <section aria-labelledby="open-title">
+        <h2 id="open-title">Open work <span class="count" id="open-count"></span></h2>
+        <div id="open" class="columns"></div>
+      </section>
+
+      <section aria-labelledby="done-title">
+        <h2 id="done-title">Finished <span class="count" id="done-count"></span></h2>
+        <div id="done" class="cards"></div>
+        <button type="button" class="ghost" id="done-more" hidden>Show all</button>
+      </section>
+
+      <section aria-labelledby="cp-title">
+        <h2 id="cp-title">Checkpoints</h2>
+        <p class="hint">The commit each agent last recorded, compared with the repo's current commit.</p>
+        <ul id="checkpoints" class="checkpoints"></ul>
+      </section>
+
+      <details id="warnings-box" hidden>
+        <summary>Ledger notes <span class="count" id="warnings-count"></span></summary>
+        <ul id="warnings"></ul>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p>Read-only. Ledger text is shown as plain text and never run. <span id="footer-mode"></span></p>
+  </footer>
+</body>
+</html>

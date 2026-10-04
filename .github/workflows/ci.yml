@@ -1,0 +1,15 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  shell-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: bash -n install.sh template/.ledger/validate.sh scripts/validate.sh tests/test.sh
+      - name: Run installer and validator tests
+        run: bash tests/test.sh
