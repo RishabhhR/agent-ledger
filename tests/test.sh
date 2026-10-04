@@ -20,12 +20,51 @@ done
 grep -q '# existing project instructions' "$project/CLAUDE.md"
 bash "$project/.ledger/validate.sh" "$project"
 
+# Flags are accepted in any order, unknown flags are rejected, and a late
+# --check never installs files into an empty target.
+late_check="$tmp/late-check"
+mkdir -p "$late_check"
+if bash "$installer" "$late_check" --check > "$tmp/late-check.out" 2>&1; then
+  echo 'late --check unexpectedly passed without an installation' >&2
+  exit 1
+fi
+[ -z "$(find "$late_check" -mindepth 1 -print -prune)" ]
+if bash "$installer" --not-a-real-option "$tmp/unknown" > "$tmp/unknown.out" 2>&1; then
+  echo 'unknown option unexpectedly passed' >&2
+  exit 1
+fi
+if bash "$installer" "$tmp/one" "$tmp/two" > "$tmp/extra.out" 2>&1; then
+  echo 'extra positional argument unexpectedly passed' >&2
+  exit 1
+fi
+
 # A second run is idempotent and does not duplicate pointer blocks.
 bash "$installer" "$project" > "$tmp/install-again.log"
 grep -q 'keep    CLAUDE.md (pointer already there)' "$tmp/install-again.log"
 [ "$(grep -Fc '<!-- agent-ledger:start -->' "$project/CLAUDE.md")" -eq 1 ]
 [ "$(grep -Fc '<!-- agent-ledger:end -->' "$project/CLAUDE.md")" -eq 1 ]
 bash "$installer" --check "$project"
+
+# The real-run example uses claimed:/closed: fields; ISO timestamps are valid.
+example="$tmp/example"
+cp -R "$project" "$example"
+cp "$root/examples/real-run-ledger.md" "$example/.ledger/LEDGER.md"
+bash "$example/.ledger/validate.sh" "$example"
+sed 's/opened:2026-10-03/opened:2026-10-03T09:00Z/' \
+  "$root/examples/real-run-ledger.md" > "$example/.ledger/LEDGER.md"
+bash "$example/.ledger/validate.sh" "$example"
+
+# Unused pointer files may be absent; every pointer that remains must be valid.
+rm "$project/GEMINI.md"
+bash "$installer" --check "$project"
+no_pointer="$tmp/no-pointer"
+cp -R "$project" "$no_pointer"
+rm "$no_pointer/CLAUDE.md" "$no_pointer/AGENTS.md"
+if bash "$installer" --check "$no_pointer" > "$tmp/no-pointer.out" 2>&1; then
+  echo 'validation unexpectedly passed without any pointer file' >&2
+  exit 1
+fi
+grep -q 'at least one of CLAUDE.md' "$tmp/no-pointer.out"
 
 # Existing project ledger content is preserved by an update.
 printf '%s\n' '# project-owned ledger' > "$tmp/custom-ledger"
@@ -43,6 +82,29 @@ bash "$installer" "$partial" > "$tmp/partial.log"
 [ "$(grep -Fc '<!-- agent-ledger:end -->' "$partial/CLAUDE.md")" -eq 1 ]
 grep -q 'partial content' "$partial/CLAUDE.md"
 bash "$installer" --check "$partial"
+
+# Duplicate complete blocks are removed rather than leaving stale orphan text.
+duplicate="$tmp/duplicate"
+mkdir -p "$duplicate"
+{
+  printf '%s\n' '# before'
+  cat "$root/template/pointers/CLAUDE.md"
+  cat "$root/template/pointers/CLAUDE.md"
+  printf '%s\n' '# after'
+} > "$duplicate/CLAUDE.md"
+bash "$installer" "$duplicate" > "$tmp/duplicate.log"
+[ "$(grep -Fc '<!-- agent-ledger:start -->' "$duplicate/CLAUDE.md")" -eq 1 ]
+[ "$(grep -Fc '<!-- agent-ledger:end -->' "$duplicate/CLAUDE.md")" -eq 1 ]
+[ "$(grep -Fc '## Multi-agent coordination' "$duplicate/CLAUDE.md")" -eq 1 ]
+grep -q '# before' "$duplicate/CLAUDE.md"
+grep -q '# after' "$duplicate/CLAUDE.md"
+[ -z "$(find "$duplicate" -maxdepth 1 -name '.agent-ledger-pointer.*' -print -prune)" ]
+
+# A Markdown setext underline with more than seven equals is not a conflict.
+underline="$tmp/underline"
+cp -R "$project" "$underline"
+printf '%s\n' '========' >> "$underline/.ledger/LEDGER.md"
+bash "$installer" --check "$underline"
 
 # The validator catches duplicate IDs and merge-conflict markers.
 bad="$tmp/bad"
