@@ -1,8 +1,6 @@
 name: Verified with a tool
 description: Share a reproducible verification result from an agent or tool.
 title: "Verification: "
-labels:
-  - verification
 body:
   - type: markdown
     attributes:

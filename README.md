@@ -6,6 +6,8 @@ When Claude Code, Codex, or another coding agent works on the same repository, y
 
 **agent-ledger gives those sessions one inspectable place to claim work, record evidence, and be independently verified.** It is a small file-based protocol, not an orchestration service.
 
+**See a real run:** [Codex → Claude ledger example](examples/real-run-ledger.md). A human seeded the work, Codex claimed and closed it with evidence, and Claude independently re-ran the tests and recorded `PASS:`.
+
 ### Start in three commands
 
 ```bash
@@ -76,7 +78,7 @@ A tool that has no instruction file should need only one line at the start of th
 | [`docs/automation.md`](docs/automation.md) | Going from manual relay to an unattended loop. |
 | [`examples/real-run-ledger.md`](examples/real-run-ledger.md) | A real ledger from a Codex → Claude run, unedited. |
 
-The hosted static dashboard is available at [agent-ledger-dashboard-ecru.vercel.app](https://agent-ledger-dashboard-ecru.vercel.app/). It is only the page; your ledger still stays on your machine and is read by the local server you start.
+The dashboard is primarily served locally by the server you start. An experimental hosted static copy is available at [agent-ledger-dashboard-ecru.vercel.app](https://agent-ledger-dashboard-ecru.vercel.app/); browsers may block its localhost connection or prompt for permission, so use the locally served page if it cannot connect.
 
 ## Verified tool matrix
 
@@ -93,7 +95,7 @@ This table is intentionally conservative and matches [docs/tools.md](docs/tools.
 
 ## What has actually been run
 
-One real cross-tool run, on a toy task, in a scratch repo: a human seeded a task for **Codex**, which read `AGENTS.md` and `.ledger/PROTOCOL.md` on its own, did the work and closed it with evidence; then **Claude**, given only a reviewer role card, re-ran the tests and recorded `PASS:` without touching the code. The resulting ledger is in [`examples/`](examples/real-run-ledger.md). The [short terminal demo](demo/agent-ledger-demo.cast) shows the same kind of claim → work → review handoff from a fresh run. The installer and validator are covered by shell regression tests on every GitHub push and pull request. The installer was tested on a fresh repo, on a repo with an existing `CLAUDE.md`, on a second run, with a project-owned ledger, and with an interrupted pointer block.
+One real cross-tool run, on a toy task, in a scratch repo: a human seeded a task for **Codex**, which read `AGENTS.md` and `.ledger/PROTOCOL.md` on its own, did the work and closed it with evidence; then **Claude**, given only a reviewer role card, re-ran the tests and recorded `PASS:` without touching the code. The resulting ledger is linked above. The installer and validator are covered by shell regression tests on every GitHub push and pull request. The installer was tested on a fresh repo, on a repo with an existing `CLAUDE.md`, on a second run, with a project-owned ledger, and with an interrupted pointer block.
 
 Not verified here: Antigravity, Gemini CLI, Cursor, Copilot or any other tool beyond Claude Code and Codex, large projects, or more than two agents at once. See [docs/tools.md](docs/tools.md).
 

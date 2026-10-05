@@ -10,7 +10,7 @@ A web page that shows what your agents are doing, what they finished, and what n
 
 There is **no backend and no account**. The page only ever talks to a server running on *your* computer, so your ledger (which can describe private code) is never sent to anyone. The page can be hosted as plain static files, or served by the local server itself.
 
-## Run it
+## Run it locally (recommended)
 
 You need Node.js and a repo that has the ledger (`install.sh`). It uses only Node's built-in modules and was tested on Node 20; CI runs on Ubuntu with Node 18, 20 and 22.
 
@@ -28,7 +28,7 @@ It prints a **pairing code** and a local address. Open the address, paste the co
 
 Options: `--port N` (default 4780) and `--allow-origin <origin>` (below).
 
-### Using a hosted copy of the page
+### Experimental: hosted copy of the page
 
 Deploy the folder `dashboard/web` as a static site (on Vercel, set the project's root directory to `dashboard/web` with no build step; `vercel.json` there sets the security headers). Then tell your server which page may read it:
 
@@ -36,11 +36,11 @@ Deploy the folder `dashboard/web` as a static site (on Vercel, set the project's
 node dashboard/server/ledger-server.mjs --repo . --allow-origin https://your-site.example
 ```
 
-A production static copy of the page is available at [agent-ledger-dashboard-ecru.vercel.app](https://agent-ledger-dashboard-ecru.vercel.app/). The page itself has no ledger access; it only works when your local server is started with that exact origin in `--allow-origin`.
+A production static copy of the page is available at [agent-ledger-dashboard-ecru.vercel.app](https://agent-ledger-dashboard-ecru.vercel.app/). The page itself has no ledger access. A hosted page may be blocked or prompt for permission when it tries to reach localhost, depending on the browser; this path has not been verified in real Chrome, Safari, or Firefox. If it cannot connect, use the locally served page above.
 
-The hosted page shows this exact command with its own address filled in. Everything else works the same: the page fetches from `http://127.0.0.1:<port>` in your browser.
+The hosted page shows the command with its own address filled in. It still fetches from `http://127.0.0.1:<port>` in your browser, subject to the browser's localhost policy.
 
-**Trade-off:** with a hosted page, whoever controls that hosting controls the JavaScript that reads your ledger. If that matters to you, don't use a hosted copy; use the page the server serves itself, or host your own.
+**Trade-off:** with a hosted page, whoever controls that hosting controls the JavaScript that reads your ledger, and the browser may refuse the localhost connection. If that matters to you, use the page the server serves itself, or host your own.
 
 ## What the page shows
 
