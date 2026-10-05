@@ -72,7 +72,7 @@ Verified (`node --test dashboard/tests/*.test.mjs`, 27 tests, plus a real browse
 **Not verified:**
 
 - **Safari and Firefox.** Browsers differ on whether a page can call `localhost`. If the hosted page can't connect, open the page the server serves itself; the page tells you this when it fails.
-- **A real public HTTPS page calling localhost.** The hosted case was simulated with a second origin on `http://localhost`. Chrome and others may show a permission prompt for a public site reaching your own computer, and that behaviour was not exercised.
+- **A real public HTTPS page calling localhost.** This was tried on 2026-10-05 against the live hosted page in one embedded Chromium browser, and the browser blocked it (`net::ERR_BLOCKED_BY_CLIENT`): a logging listener on `127.0.0.1` received no request at all, while the server answered correctly when called directly. That says nothing about regular Chrome, Safari or Firefox, which may prompt for permission or allow it; see [issue #7](https://github.com/RishabhhR/agent-ledger/issues/7). Use the locally served page if the hosted one cannot connect.
 - **Windows.**
 
 ## API (what the page uses)

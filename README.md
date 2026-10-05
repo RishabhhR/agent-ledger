@@ -6,7 +6,7 @@ When Claude Code, Codex, or another coding agent works on the same repository, y
 
 **agent-ledger gives those sessions one inspectable place to claim work, record evidence, and be independently verified.** It is a small file-based protocol, not an orchestration service.
 
-**See a real run:** [Codex → Claude ledger example](examples/real-run-ledger.md). A human seeded the work, Codex claimed and closed it with evidence, and Claude independently re-ran the tests and recorded `PASS:`.
+**See a real run:** [Codex → Claude ledger example](examples/real-run-ledger.md). A human seeded the work, Codex worked on it and closed it with evidence, and Claude independently re-ran the tests and recorded `PASS:`.
 
 ### Start in three commands
 
