@@ -6,6 +6,8 @@ When Claude Code, Codex, or another coding agent works on the same repository, y
 
 **agent-ledger gives those sessions one inspectable place to claim work, record evidence, and be independently verified.** It is a small file-based protocol, not an orchestration service.
 
+**See it in 10 seconds:** open the [dashboard](https://agent-ledger-dashboard-ecru.vercel.app/) and press **Try with sample data**. It shows a made-up project with a decision waiting, a defect and an unreviewed task. No install, and the page makes no network requests in this mode.
+
 **See a real run:** [Codex → Claude ledger example](examples/real-run-ledger.md). A human seeded the work, Codex worked on it and closed it with evidence, and Claude independently re-ran the tests and recorded `PASS:`.
 
 ### Start in three commands
