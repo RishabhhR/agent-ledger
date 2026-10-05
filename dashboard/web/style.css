@@ -88,3 +88,8 @@ footer { padding-top: 8px; padding-bottom: 32px; color: var(--muted); font-size:
 
 @media (max-width: 520px) { .top { padding-top: 12px; } .fields { display: grid; } #port-field { width: 100%; } }
 @media (prefers-reduced-motion: no-preference) { .dot { transition: background .2s; } }
+
+.sample-callout { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin: 16px 0 8px; padding: 14px 16px; border-radius: var(--radius); background: var(--accent-bg); border: 1px solid var(--line); max-width: 70ch; }
+.sample-callout p { margin: 4px 0 0; color: var(--muted); font-size: .92rem; max-width: 52ch; }
+.sample-callout button { white-space: nowrap; }
+@media (max-width: 520px) { .sample-callout button { width: 100%; } }

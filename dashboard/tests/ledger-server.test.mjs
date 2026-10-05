@@ -186,7 +186,7 @@ test("brute force is throttled, but a hostile page cannot lock the owner out", a
 
 test("serves only its own page files: no path can reach anything else", async () => {
   const s = await boot();
-  for (const url of ["/app.js", "/style.css", "/", "/index.html"]) {
+  for (const url of ["/app.js", "/style.css", "/sample-state.js", "/", "/index.html"]) {
     const r = await request(s, { url });
     assert.equal(r.status, 200, url);
     assert.match(r.headers["content-security-policy"], /default-src 'none'.*script-src 'self'.*connect-src 'self'/, url);

@@ -4,6 +4,8 @@
 // this file never uses innerHTML: nodes are built with createElement and
 // textContent only. Attributes come from fixed names, never from ledger data.
 
+import sample from "./sample-state.js"; // made-up data for "Try with sample data" (generated; see dashboard/scripts/build-sample.mjs)
+
 const $ = (id) => document.getElementById(id);
 const POLL_MS = 3000;
 const DONE_PREVIEW = 8;
@@ -33,6 +35,7 @@ let lastOkAt = 0;
 let pollTimer = null;
 let showAllDone = false;
 let polling = false;
+let sampleMode = false;         // showing the bundled sample: no server, no polling, nothing sent anywhere
 
 const sessionGet = () => { try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "null"); } catch { return null; } };
 const sessionSet = (v) => { try { v ? sessionStorage.setItem(SESSION_KEY, JSON.stringify(v)) : sessionStorage.removeItem(SESSION_KEY); } catch { /* storage may be blocked */ } };
@@ -82,6 +85,9 @@ function showConnect(message) {
   stopPolling();
   conn = null;
   etag = null;
+  sampleMode = false;
+  $("sample-banner").hidden = true;
+  $("disconnect").textContent = "Disconnect";
   $("dash").hidden = true;
   $("connect").hidden = false;
   $("disconnect").hidden = true;
@@ -90,7 +96,22 @@ function showConnect(message) {
   if (message) showError(message);
 }
 
+function trySample() {
+  stopPolling();
+  conn = null;
+  etag = null;
+  sessionSet(null);
+  sampleMode = true;
+  lastData = sample;
+  showDashboard(sample);
+  $("sample-banner").hidden = false;
+  $("stale").hidden = true;
+  $("disconnect").textContent = "Exit sample";
+  setStatus("idle", "Sample data");
+}
+
 function showDashboard(data) {
+  if (!sampleMode) $("sample-banner").hidden = true;
   $("connect").hidden = true;
   $("dash").hidden = false;
   $("disconnect").hidden = false;
@@ -304,6 +325,7 @@ async function init() {
 
   $("connect-form").addEventListener("submit", onSubmit);
   $("disconnect").addEventListener("click", () => { sessionSet(null); lastData = null; showConnect(); });
+  $("try-sample").addEventListener("click", trySample);
   $("done-more").addEventListener("click", () => { showAllDone = !showAllDone; if (lastData) render(lastData); });
   $("copy-cmd").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText($("cmd-text").textContent); $("copy-cmd").textContent = "Copied"; setTimeout(() => ($("copy-cmd").textContent = "Copy"), 1500); } catch { /* clipboard unavailable */ }

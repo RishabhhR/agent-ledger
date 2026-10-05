@@ -25,6 +25,14 @@
   <main>
     <section id="connect" aria-labelledby="connect-title">
       <h2 id="connect-title">Connect to your repo</h2>
+      <div class="sample-callout">
+        <div>
+          <strong>Just want to see it?</strong>
+          <p>Open a made-up project with open tasks, a decision waiting for you, and a defect found by a reviewer. No install, no server, and nothing leaves this page.</p>
+        </div>
+        <button type="button" id="try-sample">Try with sample data</button>
+      </div>
+
       <p class="lede">See what your AI agents are doing, what they finished, and what needs you. <strong>Your ledger never leaves your computer.</strong> This page has no backend; it only talks to a small server running on your own machine, and it can only read.</p>
 
       <ol class="steps">
@@ -56,6 +64,7 @@
     </section>
 
     <section id="dash" hidden>
+      <div id="sample-banner" class="banner" role="status" hidden><strong>Sample data.</strong> This project is made up, and nothing was read from your computer. Use "Exit sample" to go back and connect your own.</div>
       <div id="stale" class="banner" role="status" hidden></div>
 
       <section aria-labelledby="next-title">

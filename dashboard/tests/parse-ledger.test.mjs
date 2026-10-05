@@ -117,3 +117,21 @@ test("status aliases: resolved and closed count as done; unknown means open", ()
   assert.deepEqual(p.done.map((d) => d.id), ["DEC-001"]);
   assert.deepEqual(p.decisions.map((d) => d.id), ["DEC-002"]);
 });
+
+test("one defect is counted once even though a reviewer records it twice (on the finished task and as a DEFECT task)", () => {
+  const p = parseLedger(`## Tasks
+### [TASK-007] status:open from:reviewer to:builder opened:2026-10-04
+DEFECT in TASK-003: expiry is only checked on read.
+
+## Done
+### [TASK-003] status:done from:architect to:builder opened:2026-10-03 closed:2026-10-04
+Add the token store.
+FAIL: found a bug, filed as TASK-007.
+`);
+  const defect = p.attention.find((a) => /defect/.test(a.text));
+  assert.match(defect.text, /^1 defect filed/);
+  assert.deepEqual(defect.ids, ["TASK-007"]);
+  // Two genuinely different defects still count as two.
+  const two = parseLedger("## Tasks\n### [TASK-008] status:open from:r to:b\nDEFECT in TASK-001: a.\n### [TASK-009] status:open from:r to:b\nDEFECT in TASK-002: b.\n");
+  assert.match(two.attention.find((a) => /defect/.test(a.text)).text, /^2 defects filed/);
+});

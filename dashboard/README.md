@@ -10,6 +10,12 @@ A web page that shows what your agents are doing, what they finished, and what n
 
 There is **no backend and no account**. The page only ever talks to a server running on *your* computer, so your ledger (which can describe private code) is never sent to anyone. The page can be hosted as plain static files, or served by the local server itself.
 
+## Try it with sample data (no install)
+
+The page has a **Try with sample data** button. It opens a made-up project (open work for several agents, a decision waiting for a human, a defect found by a reviewer, a finished task nobody reviewed, a stale checkpoint) so you can see what the dashboard shows without installing anything or connecting a server. In this mode the page makes **no network requests**: the data is bundled into the page itself, and nothing is read from your computer.
+
+The sample comes from [`sample/sample-ledger.md`](sample/sample-ledger.md), run through the real ledger parser, so it can only show what a real server would send. To change it, edit that file and run `node dashboard/scripts/build-sample.mjs`; a test fails if you forget, and another checks that the sample is a valid ledger by the kit's own validator.
+
 ## Run it locally (recommended)
 
 You need Node.js and a repo that has the ledger (`install.sh`). It uses only Node's built-in modules and was tested on Node 20; CI runs on Ubuntu with Node 18, 20 and 22.

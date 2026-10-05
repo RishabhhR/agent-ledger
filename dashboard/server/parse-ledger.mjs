@@ -172,9 +172,20 @@ function attention({ decisions, tasks, done }, total) {
       ids: decisions.map((d) => d.id),
     });
   }
-  const defects = [...tasks.filter((t) => /^defect\b/i.test(t.title)), ...done.filter((d) => d.review === "defect")];
-  if (defects.length > 0) {
-    out.push({ level: "action", text: `${defects.length} defect${defects.length > 1 ? "s" : ""} filed by a reviewer and not yet fixed.`, ids: defects.map((d) => d.id) });
+  // The protocol has a reviewer both mark the finished task and file a "DEFECT in TASK-n" task, so one
+  // defect appears as two entries. Count it once, keyed on the task it is about.
+  const seen = new Set();
+  const defectIds = [];
+  for (const t of tasks.filter((t) => /^defect\b/i.test(t.title))) {
+    const about = /^defect in (TASK-\d+)/i.exec(t.title);
+    const key = about ? about[1].toUpperCase() : t.id;
+    if (!seen.has(key)) { seen.add(key); defectIds.push(t.id); }
+  }
+  for (const d of done.filter((d) => d.review === "defect")) {
+    if (!seen.has(d.id)) { seen.add(d.id); defectIds.push(d.id); }
+  }
+  if (defectIds.length > 0) {
+    out.push({ level: "action", text: `${defectIds.length} defect${defectIds.length > 1 ? "s" : ""} filed by a reviewer and not yet fixed.`, ids: defectIds });
   }
   const unreviewed = done.filter((d) => d.kind === "task" && d.review === null);
   if (unreviewed.length > 0) {
